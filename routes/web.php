@@ -1,0 +1,83 @@
+<?php
+
+use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\Admin\PDFController;
+use App\Http\Controllers\Admin\PortariasController;
+use App\Http\Controllers\ContatoController;
+use App\Http\Controllers\Home\HomeController;
+use App\Http\Controllers\Home\SetoresController;
+use App\Http\Controllers\LicitacoeController;
+use App\Http\Controllers\NoticiaController;
+use App\Http\Controllers\ProfileController;
+use App\Models\Noticia;
+use Illuminate\Support\Facades\Route;
+
+
+Route::get('/', [HomeController::class, 'index'])->name('home.pages.index');
+Route::get('diretor/', [HomeController::class, 'diretor'])->name('home.pages.diretor.index');
+Route::get('estrutura/', [HomeController::class, 'estrutura'])->name('home.pages.estrutura');
+Route::get('sobre/', [HomeController::class, 'sobre'])->name('home.pages.sobre.index');
+Route::get('noticias/', [HomeController::class, 'noticias'])->name('home.pages.noticias.index');
+Route::get('noticias/{slug}', [NoticiaController::class, 'view'])->name('home.pages.noticias.view');
+Route::get('portarias/', [HomeController::class, 'portaria'])->name('home.pages.portarias.index');
+Route::get('contatos/', [HomeController::class, 'contatos'])->name('home.pages.contatos.index');
+Route::post('contatos/store', [HomeController::class, 'store'])->name('home.pages.contato.store');
+Route::get('licitacao/', [HomeController::class, 'licitacao'])->name('home.pages.licitacao.index');
+
+Route::get('download/', [HomeController::class, 'download'])->name('home.pages.download');
+
+// Setores
+Route::get('assessoria/administrativa/', [SetoresController::class, 'administrativa'])->name('home.pages.setores.administrativa');
+Route::get('contabil/', [SetoresController::class, 'contabil'])->name('home.pages.setores.contabil');
+Route::get('pessoal/', [SetoresController::class, 'pessoal'])->name('home.pages.setores.pessoal');
+Route::get('contas/', [SetoresController::class, 'contas'])->name('home.pages.setores.contas');
+Route::get('manutencao/', [SetoresController::class, 'manutencao'])->name('home.pages.setores.manutencao');
+Route::get('atendimento/', [SetoresController::class, 'atendimento'])->name('home.pages.setores.atendimento');
+Route::get('procuradoria/', [SetoresController::class, 'procuradoria'])->name('home.pages.setores.procuradoria');
+Route::get('financeiro/', [SetoresController::class, 'financeiro'])->name('home.pages.setores.financeiro');
+
+Route::get('legislacao/', [HomeController::class, 'legislacao'])->name('home.pages.legislacao');
+
+Route::get('estrutura-organizacional/', [HomeController::class, 'organizacional'])->name('home.pages.estrutura');
+
+Route::get('/dashboard', function () {
+    $data = Noticia::latest()->get();
+    return view('admin.pages.noticias.index', compact('data'));
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/noticias', [NoticiaController::class, 'index'])->name('admin.noticias.index');
+    //licitacoes e contratos
+    Route::get('/admin/licitacoes', [LicitacoeController::class, 'index'])->name('admin.licitacoes.index');
+    Route::get('/admin/licitacoes/create', [LicitacoeController::class, 'create'])->name('admin.licitacoes.create');
+    Route::post('/admin/licitacoes/store', [LicitacoeController::class, 'store'])->name('admin.licitacoes.store');
+    Route::delete('admin/licitacoes/delete/{id}', [LicitacoeController::class, 'destroy'])->name('admin.licitacoes.destroy');
+
+    //noticias
+    Route::get('/admin/noticias', [NoticiaController::class, 'index'])->name('admin.noticias.index');
+    Route::get('/admin/noticias/create', [NoticiaController::class, 'create'])->name('admin.noticias.create');
+    Route::get('/admin/noticia/edit/{id}', [NoticiaController::class, 'edit'])->name('admin.noticias.edit');
+    Route::post('/admin/noticias/store', [NoticiaController::class, 'store'])->name('admin.noticias.store');
+    Route::post('/admin/noticias/update/{id}', [NoticiaController::class, 'update'])->name('admin.noticias.update');
+    Route::delete('admin/noticias/delete/{id}', [NoticiaController::class, 'destroy'])->name('admin.noticia.destroy');
+
+    //portaria
+    Route::get('/admin/portaria', [PortariasController::class, 'index'])->name('admin.portaria.index');
+    Route::get('/admin/portaria/create', [PortariasController::class, 'create'])->name('admin.portaria.create');
+    Route::post('/admin/portaria/store', [PortariasController::class, 'store'])->name('admin.portaria.store');
+    Route::delete('admin/portaria/delete/{id}', [PortariasController::class, 'destroy'])->name('admin.portaria.destroy');
+    //contatos
+    Route::get('/admin/contatos', [ContatoController::class, 'index'])->name('admin.pages.contatos.index');
+    Route::get('/admin/contatos/delete/{id}', [ContatoController::class, 'destroy'])->name('admin.pages.contatos.destroy');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // export contatos
+    Route::post('generate-pdf', [PDFController::class, 'store'])->name('admin.pages.pdf');
+
+
+});
+
+require __DIR__.'/auth.php';
